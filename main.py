@@ -27,7 +27,8 @@ class LinearSystem:
         """
         Evolve the state of the system based on the control input.
         """
-        self.state = self.A @ self.state + self.B @ u
+        process_noise = np.random.normal([0, 0], Q)
+        self.state = self.A @ self.state + self.B @ u + process_noise
 
     def take_measurement(self):
         """
@@ -56,8 +57,8 @@ A = np.array([[1, 0.1], [0, 1]])  # System dynamics matrix
 B = np.array([[0.5, 0], [0, 1]])  # Control input matrix
 C = np.array([[1, 0], [0, 1]])  # Measurement matrix
 x0 = np.array([[0], [0]])  # Initial state
-Q = np.array([[0.00025, 0.0005], [0.0005, 0.0001]])  # Process noise covariance
-R = 1  # Measurement noise covariance
+Q = np.array([[1, 0], [0, 1]])  # Process noise covariance
+R = 2  # Measurement noise covariance
 P0 = 5*np.eye(2)  # Initial error covariance matrix
 
 system = LinearSystem(A, B, C, x0, Q, R, P0)
