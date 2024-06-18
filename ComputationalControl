@@ -1,0 +1,25 @@
+## ReplayBG Specifics
+
+simulate() runs a sytem simulation. It takes the following inputs:
+- basal_handler: the function/controller that returns the  basal insulin injection value
+- basal_handler_params: dict() with parameters defined by the control designer that can be accessed during simulation by the handler
+- data_given: a pandas dataframe that describes the meal intake. The example below shows how to create the dataframe by reading the meal csv file (the control designer may change the csv file or define multiple csv files/dataframes as needed)
+- meal_input_modulation_factor: constant that modules the impact of a meal (the default value should be used)
+
+T1DModel: The T1DModel class is a part of ReplayBG's simulator and describes the glucose dynamics. It takes the following inputs:
+- data: pandas dataframe which contains the preliminary meal data ("data" is not very relevant as it is overwritten with data_given when simulate() is called)
+- bw: the body weight of the patient (the default value should be used)
+- yts: The continuous glucose measurement (cgm) sample time (the default value should be used)
+- glucose_model: the model equation to be used as measured glucose ('IG' should be used)
+- is_single_meal: a flag indicating if the model will be used as single meal or multi meal (the default value (False) should be used)
+- exercise: a boolean indicating if the model includes exercise (the default value (False) should be used)
+
+The initial control design should not need most of the inputs, as InsulinCo is primarily interested in performance on the basic/default case. For the bonus, you could consider changing some of the inputs. Keep in mind, InsulinCo is primarily interested in new control methods rather than exhaustive studies, so any parameter changes should be used/changed to demonstrate the value of a given controller, not for the sake of an exhaustive study.
+
+Below are some additional functions from InsulinCo intended to make the ReplayBG simulator easier to use.
+
+**get_linearization():** InsulinCO has provided this function to you to help design your controllers. It linearizes the dynamics around a given operating point but does *not* take into account the basal insulin injection delay. This means that for a given time index $t$ and a delay $tau$, the basal insulin injection value returned by the controller will only be seen by the system at the time step $t+tau$. This also means that for the same $t$, the control actions at the time steps between $t$ and $t+tau-1$ are already defined and cannot be changed. 
+
+<font color='red'>NOTE</font>: The ReplayBG simulator has a delay that is not included in the linearization. This delay must be factored in separately from the linearizaed dynamics described by the A matrix.
+
+**get_discretized_meals():** InsulinCo has provided this function to you to help interface between the ReplayBG simulator and the csv (that you may edit) that defines the meals. get_discretized_meals() is helpful because of how ReplayBG processes the meal data. Specifically, ReplayBG does some operations on the values written in the csv file to get the value of $m(t)$. Thus, to access this internal variable of ReplayBG, InsulinCo created this function which returns a vector with the all the $m[k]$ in a certain interval of time and according to a discretization time step. 
